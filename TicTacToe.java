@@ -36,6 +36,8 @@ public class TicTacToe{
 class Game{
 String playerName;
 Player play;
+Battle battle;
+Creature creature;
     Game(){
 
     }
@@ -45,18 +47,20 @@ Player play;
     public void setPlayerName(String playerName){
         this.playerName=playerName;
     }
-    public Creature Battle(String beast){
-        switch(beast){
-            case "wolf":
-            Creature wolf = new Wolf("Wolf",13,3,0,1);
-            return wolf;
-            default:
-            System.out.println("error");
-        }
 
-    }
     public Player getPlayer(){
         return play;
+    }
+    public void Battle(Player player, String creature){
+        switch(creature){
+            case "wolf":
+            this.creature=new Wolf("Wolf",10,3,0,1);
+            default:
+            this.creature=new Wolf("Wolf",10,3,0,1);
+        }
+        battle=new Battle(player, this.creature);
+        battle.Attacking();
+        battle.Attacked();
     }
 }
 
@@ -64,14 +68,17 @@ class Battle{
 
     Game game;
     Player player;
-    public Battle(Player player){
+    Creature creature;
+    public Battle(Player player,Creature creature){
         this.player=player;
+        this.creature=creature;
+        
     }
-    public Attacking(Creature creature){
-       creature.setHealth(this.creature.getHealth()-player.getAttack);
+    public void Attacking(){
+       creature.setHealth(creature.getHealth()-player.getAttack());
     }
-    public Attacked(Creature creature){
-        this.player.setHealth(this.player.getHealth()-creature.getAttack());
+    public void Attacked(){
+        this.player.setHealth(player.getHealth()-creature.getAttack());
     }
 
 }
@@ -140,10 +147,6 @@ class Player extends Creature{
    public Player(String name, int health, int attack, int mp, int level,int experience){
        super(name,health,attack,mp,level);
        this.experience=experience;
-       moves[0]="Basic Attack";
-       moves[1]="";
-       moves[2]="";
-       moves[3]="";
    }
    public int getExperience(){
        return experience;
@@ -177,6 +180,7 @@ class makeScreen extends JFrame{
     JButton settings = new JButton("Settings");
     JButton mainMenu = new JButton("Main Menu");
     JButton next = new JButton("Next");
+    JButton att1 = new JButton("Basic Attack");
     CardLayout layout = new CardLayout();
     JPanel panel = new JPanel();
     JPanel game = new JPanel();
@@ -188,6 +192,8 @@ class makeScreen extends JFrame{
     Scanner scanner=null;
     Game RPG =new Game();
     boolean battle=false;
+    Player player = new Player("Bob",100,3,20,1,0);
+    String tempMonster;
  
     makeScreen(){
         super();
@@ -205,22 +211,6 @@ class makeScreen extends JFrame{
 
 
     }
-    private void battleButtons(){
-        JButton att1=new JButton(RPG.getPlayer().moves[0]);
-        att1.addNewActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                attac
-            }
-        });
-        JButton att2=new JButton(RPG.getPlayer().moves[1]);
-        JButtton att3=new JButton(RPG.getPlayer().moves[2]);
-        JButton att4=new JButton(RPG.getPlayer().moves[3]);
-        game.add(att1);
-        game.add(att2);
-        game.add(att3);
-        game.add(att4);
-    }
-
     private void addButtons(){
         play.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -250,6 +240,7 @@ class makeScreen extends JFrame{
         next.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 Reader(scanner,updateText);
+                
             }
         });
         menu.add(play);
@@ -261,12 +252,16 @@ class makeScreen extends JFrame{
         game.add(exit2);
         game.add(gameText);
 
+        battleMenu.add(att1);
+
 
         game.setBackground(Color.DARK_GRAY);
         menu.setBackground(Color.DARK_GRAY);
+        battleMenu.setBackground(Color.DARK_GRAY);
 
         panel.add(menu,"Menu");
         panel.add(game,"Game");
+        panel.add(battleMenu,"Battle Menu");
 
         add(panel);
         layout.show(panel,"Menu");
@@ -283,6 +278,12 @@ class makeScreen extends JFrame{
         
     }
     public void Reader(Scanner in,String[]input){
+        att1.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                RPG.Battle(player,tempMonster);
+            }
+        });
+
         if(scanner==null){
             setScanner(in);
         }
@@ -290,11 +291,17 @@ class makeScreen extends JFrame{
         input=new String[Integer.parseInt(length)];
         for(int i=0;i<Integer.parseInt(length);i++){
             input[i]=scanner.nextLine();
-            String boo=input[i].charAt(0);
+            String boo=Character.toString(input[i].charAt(0));
+            System.out.println(boo);
             if(boo.equals("#")){
-            String[]monster=input[i].split("#");
-            RPG.Battle(monster[1]);
-            battle=true;    
+                String monster=input[i].substring(1);
+                System.out.println(monster+"------");
+                tempMonster=monster;
+                battle=true; 
+                System.out.println(battle);   
+                if(battle==true){
+                    layout.show(panel,"Battle Menu");
+                }   
             }
         }
         changeText(input);   
